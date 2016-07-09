@@ -3,25 +3,28 @@ package com.commonsware.empublite;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import de.greenrobot.event.EventBus;
+
 public class EmPubLiteActivity extends Activity {
     private ViewPager pager = null;
     private ContentsAdapter adapter = null;
+    private static final String MODEL = "model";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setupStrictMode();
+
         setContentView(R.layout.main);
         pager = (ViewPager)findViewById(R.id.pager);
 
-        adapter = new ContentsAdapter(this);
-        pager.setAdapter(adapter);
-        findViewById(R.id.progressBar1).setVisibility(View.GONE);
-        pager.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -49,5 +52,59 @@ public class EmPubLiteActivity extends Activity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventBus.getDefault().register(this);
+
+        if (adapter == null) {
+            ModelFragment mfrag=
+                    (ModelFragment)getFragmentManager().findFragmentByTag(MODEL);
+
+            if (mfrag == null) {
+                mfrag = new ModelFragment();
+
+                getFragmentManager()
+                        .beginTransaction()
+                        .add(mfrag, MODEL)
+                        .commit();
+            }
+            else if (mfrag.getBook() != null) {
+                setupPager(mfrag.getBook());
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        EventBus.getDefault().unregister(this);
+        super.onPause();
+    }
+
+    @SuppressWarnings("unused")
+    public void onEventMainThread(BookLoadedEvent event) {
+        setupPager(event.getBook());
+    }
+
+    private void setupPager(BookContents contents) {
+        adapter = new ContentsAdapter(this, contents);
+        pager.setAdapter(adapter);
+        findViewById(R.id.progressBar1).setVisibility(View.GONE);
+        pager.setVisibility(View.VISIBLE);
+    }
+
+    private void setupStrictMode() {
+        StrictMode.ThreadPolicy.Builder builder=
+                new StrictMode.ThreadPolicy.Builder()
+                        .detectAll()
+                        .penaltyLog();
+
+        if (BuildConfig.DEBUG) {
+            builder.penaltyFlashScreen();
+        }
+
+        StrictMode.setThreadPolicy(builder.build());
     }
 }
