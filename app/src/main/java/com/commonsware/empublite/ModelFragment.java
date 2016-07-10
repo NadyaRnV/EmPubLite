@@ -3,9 +3,11 @@ package com.commonsware.empublite;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Process;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -19,6 +21,7 @@ import de.greenrobot.event.EventBus;
 
 public class ModelFragment extends Fragment {
     private BookContents contents = null;
+    private SharedPreferences prefs=null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,11 +30,11 @@ public class ModelFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity host) {
-        super.onAttach(host);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
         if (contents == null) {
-            new LoadThread(host.getAssets()).start();
+            new LoadThread(context).start();
         }
     }
 
@@ -39,25 +42,35 @@ public class ModelFragment extends Fragment {
         return(contents);
     }
 
+    synchronized public SharedPreferences getPrefs() {
+        return(prefs);
+    }
+
+
     private class LoadThread extends Thread {
+        private Context ctxt = null;
 
-        private AssetManager assets = null;
-
-        LoadThread(AssetManager assets) {
+        LoadThread(Context ctxt) {
             super();
-            this.assets = assets;
+
+            this.ctxt = ctxt.getApplicationContext();
         }
 
         @Override
         public void run() {
+            synchronized(this) {
+                prefs = PreferenceManager.getDefaultSharedPreferences(ctxt);
+            }
+
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             Gson gson = new Gson();
 
             try {
-                InputStream is = assets.open("book/contents.json");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                InputStream is = ctxt.getAssets().open("book/contents.json");
+                BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(is));
 
-                synchronized (this) {
+                synchronized(this) {
                     contents = gson.fromJson(reader, BookContents.class);
                 }
 
