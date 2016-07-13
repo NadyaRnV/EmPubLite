@@ -11,5 +11,8 @@ when re-opening the app</string>
 foreground</string>
     <string name="keepscreenon_title">Keep Screen On</string>
     <string name="settings">Settings</string>
+    <string name="hint">notes here</string>
+    <string name="notes">Notes</string>
+    <string name="delete">Delete</string>
 
 </resources>

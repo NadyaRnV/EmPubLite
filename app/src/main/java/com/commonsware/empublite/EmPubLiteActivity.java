@@ -61,6 +61,14 @@ public class EmPubLiteActivity extends Activity {
 
                 return true;
 
+            case R.id.notes:
+
+                i = new Intent(this, NoteActivity.class);
+                i.putExtra(NoteActivity.EXTRA_POSITION, pager.getCurrentItem());
+                startActivity(i);
+
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }

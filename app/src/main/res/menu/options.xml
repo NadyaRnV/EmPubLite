@@ -23,4 +23,13 @@
         >
     </item>
 
+
+    <item
+        android:id="@+id/notes"
+        android:icon="@drawable/ic_action_edit"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/notes">
+        >
+    </item>
+
 </menu>
