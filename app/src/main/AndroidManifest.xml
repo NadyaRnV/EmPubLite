@@ -8,6 +8,8 @@
         android:smallScreens="false"
         android:xlargeScreens="true" />
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -22,9 +24,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SimpleContentActivity"></activity>
-        <activity android:name="Preferences"></activity>
-        <activity android:name="NoteActivity"></activity>
-</application>
+        <activity android:name=".SimpleContentActivity" />
+        <activity android:name=".Preferences" />
+        <activity android:name=".NoteActivity" />
+
+        <service
+            android:name=".DownloadCheckService"
+            android:exported="false" />
+    </application>
 
 </manifest>
